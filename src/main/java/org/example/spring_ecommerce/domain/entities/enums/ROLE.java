@@ -1,5 +1,5 @@
 package org.example.spring_ecommerce.domain.entities.enums;
 
-public enum Roles {
+public enum ROLE {
     USER, ADMIN
 }

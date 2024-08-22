@@ -3,9 +3,8 @@ package org.example.spring_ecommerce.domain.entities;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
-import org.example.spring_ecommerce.domain.entities.enums.Roles;
+import org.example.spring_ecommerce.domain.entities.enums.ROLE;
 
-import javax.management.relation.Role;
 import java.util.List;
 
 @Entity
@@ -18,7 +17,7 @@ public class Usuario {
 
         @NotEmpty
         @Column(nullable = false, unique = true)
-        private String primeiro_nome;
+        private String primeiroNome;
 
         @NotEmpty
         @Column(nullable = false, unique = true)
@@ -38,6 +37,6 @@ public class Usuario {
 
         @Enumerated(EnumType.STRING)
         @Column(nullable = false, unique = true)
-        private Roles roles;
+        private ROLE roles;
 
     }
