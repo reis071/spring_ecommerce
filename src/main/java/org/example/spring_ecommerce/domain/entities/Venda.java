@@ -26,8 +26,7 @@ public class Venda {
     @Column(nullable = false)
     private BigDecimal valorTotal;
 
-    public Venda() {}
-
+    public Venda() { }
     public Venda(Usuario usuario, LocalDateTime dataVenda, BigDecimal valorTotal) {
         this.usuario = usuario;
         this.dataVenda = dataVenda;
