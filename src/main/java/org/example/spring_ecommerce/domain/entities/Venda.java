@@ -25,4 +25,44 @@ public class Venda {
 
     @Column(nullable = false)
     private BigDecimal valorTotal;
+
+    public Venda() {}
+
+    public Venda(Usuario usuario, LocalDateTime dataVenda, BigDecimal valorTotal) {
+        this.usuario = usuario;
+        this.dataVenda = dataVenda;
+        this.valorTotal = valorTotal;
+    }
+
+    public void setUsuario(Usuario usuario) {
+        this.usuario = usuario;
+    }
+
+    public void setDataVenda(LocalDateTime dataVenda) {
+        this.dataVenda = dataVenda;
+    }
+
+    public void setValorTotal(BigDecimal valorTotal) {
+        this.valorTotal = valorTotal;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public List<ItemVenda> getItensVenda() {
+        return itensVenda;
+    }
+
+    public LocalDateTime getDataVenda() {
+        return dataVenda;
+    }
+
+    public BigDecimal getValorTotal() {
+        return valorTotal;
+    }
 }

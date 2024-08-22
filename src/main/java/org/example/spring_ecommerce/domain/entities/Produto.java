@@ -27,12 +27,21 @@ public class Produto {
     @Column(nullable = false)
     private boolean ativo = true;
 
-    @OneToMany(mappedBy = "produto")
-    private List<ItemVenda> itensVenda;
-
     @Column(nullable = false)
     private LocalDateTime criadoEm;
 
     @Column(nullable = false)
     private LocalDateTime atualizadoEm;
+
+    public Produto() {}
+
+    public Produto(String nome, BigDecimal preco, Integer estoque, boolean ativo, LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+        this.nome = nome;
+        this.preco = preco;
+        this.estoque = estoque;
+        this.ativo = ativo;
+        this.criadoEm = criadoEm;
+        this.atualizadoEm = atualizadoEm;
+    }
+
 }
