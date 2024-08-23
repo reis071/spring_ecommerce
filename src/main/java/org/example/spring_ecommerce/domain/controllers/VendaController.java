@@ -1,15 +1,17 @@
 package org.example.spring_ecommerce.domain.controllers;
 
-import org.example.spring_ecommerce.domain.entities.Produto;
+
 import org.example.spring_ecommerce.domain.entities.Venda;
-import org.example.spring_ecommerce.domain.services.ProdutoService;
+
 import org.example.spring_ecommerce.domain.services.VendaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -70,4 +72,21 @@ public class VendaController {
         }
     }
 
+    @GetMapping("/relatorioPorData")
+    public ResponseEntity<List<Venda>> getVendasByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+        List<Venda> vendas = vendaService.findVendasByDate(data);
+        return ResponseEntity.ok(vendas);
+    }
+
+    @GetMapping("/relatorioPorMesAno")
+    public ResponseEntity<List<Venda>> getVendasByMonth(@RequestParam int ano, @RequestParam int mes) {
+        List<Venda> vendas = vendaService.findVendasByMonth(ano, mes);
+        return ResponseEntity.ok(vendas);
+    }
+
+    @GetMapping("/relatorioPorSemanaAtual")
+    public ResponseEntity<List<Venda>> getVendasThisWeek() {
+        List<Venda> vendas = vendaService.findVendasThisWeek();
+        return ResponseEntity.ok(vendas);
+    }
 }

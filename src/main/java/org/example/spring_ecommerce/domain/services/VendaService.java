@@ -11,9 +11,13 @@ import org.example.spring_ecommerce.domain.repositories.VendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class VendaService {
@@ -115,4 +119,31 @@ public class VendaService {
         return vendaRepository.save(venda);
     }
 
+    public List<Venda> findVendasByDate(LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+        return vendaRepository.findByDataVendaBetween(startOfDay, endOfDay);
+    }
+
+    public List<Venda> findVendasByMonth(int year, int month) {
+        LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
+        LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
+        return vendaRepository.findByDataVendaBetween(startOfMonth, endOfMonth);
+    }
+
+    public List<Venda> findVendasThisWeek() {
+        LocalDate now = LocalDate.now();
+        LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
+        LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
+
+        LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
+        LocalDateTime endOfWeekDateTime = endOfWeek.atTime(LocalTime.MAX);
+
+        return vendaRepository.findByDataVendaBetween(startOfWeekDateTime, endOfWeekDateTime).stream()
+                .filter(venda -> {
+                    LocalDate vendaDate = venda.getDataVenda().toLocalDate();
+                    return !vendaDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) && !vendaDate.getDayOfWeek().equals(DayOfWeek.SUNDAY);
+                })
+                .collect(Collectors.toList());
+    }
 }
