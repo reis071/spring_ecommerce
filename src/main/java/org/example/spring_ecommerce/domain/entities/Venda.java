@@ -1,9 +1,13 @@
 package org.example.spring_ecommerce.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -17,17 +21,20 @@ public class Venda {
     @JoinColumn(name = "usuario_id", nullable = false)
     private Usuario usuario;
 
-    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL)
-    private List<ItemVenda> itensVenda;
 
     @Column(nullable = false)
     private LocalDateTime dataVenda;
 
     @Column(nullable = false)
-    private BigDecimal valorTotal;
+    private double valorTotal;
+
+    @OneToMany(mappedBy = "venda", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<ItemVenda> itensVenda = new ArrayList<>();
 
     public Venda() { }
-    public Venda(Usuario usuario, LocalDateTime dataVenda, BigDecimal valorTotal) {
+
+    public Venda(Usuario usuario, LocalDateTime dataVenda, double valorTotal) {
         this.usuario = usuario;
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
@@ -41,7 +48,7 @@ public class Venda {
         this.dataVenda = dataVenda;
     }
 
-    public void setValorTotal(BigDecimal valorTotal) {
+    public void setValorTotal(double valorTotal) {
         this.valorTotal = valorTotal;
     }
 
@@ -61,7 +68,7 @@ public class Venda {
         return dataVenda;
     }
 
-    public BigDecimal getValorTotal() {
+    public double getValorTotal() {
         return valorTotal;
     }
 }

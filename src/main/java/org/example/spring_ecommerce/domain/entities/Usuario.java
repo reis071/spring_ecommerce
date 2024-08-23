@@ -1,10 +1,13 @@
 package org.example.spring_ecommerce.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import org.example.spring_ecommerce.domain.entities.enums.ROLE;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -30,8 +33,9 @@ public class Usuario {
         @Column(nullable = false)
         private String email;
 
-        @OneToMany(mappedBy = "usuario")
-        private List<Venda> vendas;
+        @JsonIgnore
+        @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+        private List<Venda> vendas = new ArrayList<>();
 
         @Enumerated(EnumType.STRING)
         @Column(nullable = false, unique = true)
