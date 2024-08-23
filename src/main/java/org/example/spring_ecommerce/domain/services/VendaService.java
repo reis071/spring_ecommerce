@@ -9,6 +9,8 @@ import org.example.spring_ecommerce.domain.repositories.ProdutoRepository;
 import org.example.spring_ecommerce.domain.repositories.UsuarioRepository;
 import org.example.spring_ecommerce.domain.repositories.VendaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -39,6 +41,7 @@ public class VendaService {
         this.vendaRepository = vendaRepository;
     }
 
+    @CacheEvict(value = "vendaCache", allEntries = true)
     public Venda save(String nomeProd, Integer quantidade, Long usuarioId) {
         // Verificar se o produto existe pelo nome
         Produto produtoAtual = produtoRepository.findByNome(nomeProd)
@@ -72,6 +75,7 @@ public class VendaService {
         return venda;
     }
 
+    @Cacheable("vendaCache")
     public List<Venda> findAll() {
         return vendaRepository.findAll();
     }

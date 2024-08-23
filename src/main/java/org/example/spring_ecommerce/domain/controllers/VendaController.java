@@ -89,4 +89,5 @@ public class VendaController {
         List<Venda> vendas = vendaService.findVendasThisWeek();
         return ResponseEntity.ok(vendas);
     }
+
 }
