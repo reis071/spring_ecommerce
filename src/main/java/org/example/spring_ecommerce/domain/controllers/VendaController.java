@@ -8,23 +8,25 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
-@Controller
-@RequestMapping("/vendas")
+
+@RestController
 public class VendaController {
 
     @Autowired
     private VendaService vendaService;
 
-    @PostMapping(path = "/add")
+    @PostMapping(path = "vendas/add")
     public ResponseEntity<Venda> createVenda(@RequestParam String produtoNome,
                                              @RequestParam(required = false) Integer quantidade,
-                                             @RequestParam Long usuarioId) {
+                                             @RequestParam Long usuarioId,Authentication authentication) {
         try {
             Venda novaVenda = vendaService.save(produtoNome, quantidade, usuarioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
@@ -33,8 +35,8 @@ public class VendaController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<List<Venda>> getAllVendas() {
+    @GetMapping("/vendas")
+    public ResponseEntity<List<Venda>> getAllVendas(Authentication authentication) {
         List<Venda> vendas = vendaService.findAll();
         return ResponseEntity.ok(vendas);
     }
@@ -49,7 +51,8 @@ public class VendaController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVenda(@PathVariable Long id) {
         try {
             vendaService.delete(id);

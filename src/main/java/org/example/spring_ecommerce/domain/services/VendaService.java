@@ -2,7 +2,7 @@ package org.example.spring_ecommerce.domain.services;
 
 import org.example.spring_ecommerce.domain.entities.ItemVenda;
 import org.example.spring_ecommerce.domain.entities.Produto;
-import org.example.spring_ecommerce.domain.entities.Usuario;
+import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
 import org.example.spring_ecommerce.domain.entities.Venda;
 import org.example.spring_ecommerce.domain.repositories.ItemVendaRepository;
 import org.example.spring_ecommerce.domain.repositories.ProdutoRepository;
@@ -23,9 +23,6 @@ import java.util.stream.Collectors;
 
 @Service
 public class VendaService {
-
-
-
 
     private final ProdutoRepository produtoRepository;
     private final UsuarioRepository usuarioRepository;

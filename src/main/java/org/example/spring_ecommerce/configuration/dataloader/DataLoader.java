@@ -1,10 +1,10 @@
 package org.example.spring_ecommerce.configuration.dataloader;
 
+
 import org.example.spring_ecommerce.domain.entities.ItemVenda;
 import org.example.spring_ecommerce.domain.entities.Produto;
-import org.example.spring_ecommerce.domain.entities.Usuario;
 import org.example.spring_ecommerce.domain.entities.Venda;
-import org.example.spring_ecommerce.domain.entities.enums.ROLE;
+import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
 import org.example.spring_ecommerce.domain.repositories.ItemVendaRepository;
 import org.example.spring_ecommerce.domain.repositories.ProdutoRepository;
 import org.example.spring_ecommerce.domain.repositories.UsuarioRepository;
@@ -13,13 +13,12 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Component
 public class DataLoader {
 
-
+/*
     @Bean
     public ApplicationRunner initUsuario(UsuarioRepository usuarioRepository,
                                          VendaRepository vendaRepository,
@@ -28,7 +27,7 @@ public class DataLoader {
 
         return args -> {
             if (usuarioRepository.count() == 0) {
-                Usuario usuario = usuarioRepository.save(new Usuario("teste","teste","123","teste@gmail.com", ROLE.USER));
+                Usuario usuario = usuarioRepository.save(new Usuario("teste","123","teste@gmail.com"));
 
                 Venda venda = vendaRepository.save(new Venda(usuario, LocalDateTime.now(), 20.0));
 
@@ -37,5 +36,9 @@ public class DataLoader {
                 ItemVenda itemVenda = itemVendaRepository.save(new ItemVenda(produto,venda,20));
             }
         };
+
     }
+
+     */
 }
+

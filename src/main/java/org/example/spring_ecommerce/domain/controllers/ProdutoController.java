@@ -5,6 +5,7 @@ import org.example.spring_ecommerce.domain.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,10 +20,8 @@ public class ProdutoController {
     private ProdutoService produtoService;
 
     @PostMapping("/add")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Produto> addProduto(@RequestBody Produto produto) {
-
-
-
         Produto novoProduto = produtoService.save(produto);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(novoProduto);
@@ -39,6 +38,7 @@ public class ProdutoController {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Produto> updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
 
         Produto existingProduto = produtoService.findById(id);
@@ -59,6 +59,7 @@ public class ProdutoController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteProduto(@PathVariable Long id) {
         produtoService.deleteById(id);
         return ResponseEntity.noContent().build();
