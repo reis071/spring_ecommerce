@@ -2,19 +2,19 @@ package org.example.spring_ecommerce.domain.controllers;
 
 import lombok.RequiredArgsConstructor;
 
-import org.example.spring_ecommerce.domain.dto.UsuarioDto;
+import org.example.spring_ecommerce.domain.controllers.dto.CredenciaisDto;
+import org.example.spring_ecommerce.domain.controllers.dto.TokenDto;
+import org.example.spring_ecommerce.domain.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
 import org.example.spring_ecommerce.domain.security.jwt.JwtService;
 import org.example.spring_ecommerce.domain.services.UsuarioService;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
 
-import java.nio.file.Path;
+import java.util.List;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -22,6 +22,7 @@ import java.nio.file.Path;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final JwtService jwtService;
 
     @PostMapping(path = "/add")
     @PreAuthorize("hasRole('ADMIN')")
@@ -29,5 +30,20 @@ public class UsuarioController {
         Usuario usuarioSalvo = usuarioService.salvar(body.getUsuario(), body.getPermissoes());
         return ResponseEntity.ok(usuarioSalvo);
     }
+
+    @GetMapping(path = "/todos")
+    public ResponseEntity<List<Usuario>> listarTodos(){
+        return ResponseEntity.ok().body(usuarioService.obterTodosUsuarios());
+    }
+
+    @PostMapping("/autenticar")
+    public TokenDto autenticar(@RequestBody CredenciaisDto credenciais){
+            Usuario usuario = Usuario.builder()
+                    .email(credenciais.getEmail())
+                    .senha(credenciais.getSenha()).build();
+            UserDetails usuarioAutenticado = usuarioService.autenticar(usuario);
+            String token = jwtService.gerarToken(usuario);
+            return new TokenDto(usuario.getEmail(), token);
+ }
 
 }

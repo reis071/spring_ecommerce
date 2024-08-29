@@ -8,6 +8,10 @@ import org.example.spring_ecommerce.domain.entities.usuario.UsuarioGrupo;
 import org.example.spring_ecommerce.domain.repositories.GrupoRepository;
 import org.example.spring_ecommerce.domain.repositories.UsuarioGrupoRepository;
 import org.example.spring_ecommerce.domain.repositories.UsuarioRepository;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UsuarioService {
+public class UsuarioService implements UserDetailsService {
 
     private final UsuarioRepository repository;
     private final GrupoRepository grupoRepository;
@@ -46,6 +50,15 @@ public class UsuarioService {
         return usuario;
     }
 
+    public UserDetails autenticar( Usuario usuario ){
+        UserDetails user = loadUserByUsername(usuario.getEmail());
+        boolean senhasBatem = passwordEncoder.matches( usuario.getSenha(), user.getPassword() );
+        if(senhasBatem){
+            return user;
+        }
+        return null;
+    }
+
     public Usuario obterUsuarioComPermissoes(String email){
         Optional<Usuario> usuarioOptional = repository.findByEmail(email);
         if(usuarioOptional.isEmpty()){
@@ -57,5 +70,15 @@ public class UsuarioService {
         usuario.setPermissoes(permissoes);
 
         return usuario;
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        Usuario usuario = repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado na base de dados."));
+        return usuario;
+    }
+    public List<Usuario> obterTodosUsuarios(){
+        return repository.findAll();
     }
 }

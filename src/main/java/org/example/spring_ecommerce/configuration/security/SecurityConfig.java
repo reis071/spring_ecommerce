@@ -1,5 +1,7 @@
 package org.example.spring_ecommerce.configuration.security;
 
+import org.example.spring_ecommerce.domain.security.jwt.JwtAuthFilter;
+import org.example.spring_ecommerce.domain.services.UsuarioService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
@@ -12,6 +14,7 @@ import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 
 @Configuration
@@ -19,22 +22,22 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
+    
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    ValidationPass validationPass,
-                                                   CustomAuthenticationProvider customAuthenticationProvider) throws Exception {
+                                                   JwtAuthFilter jwtAuthFilter,
+                                                   CustomAuthenticationProvider customAuthenticationProvider,
+                                                   UsuarioService usuarioService) throws Exception {
         return  http.
         csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(customizer -> {
-
                     customizer.anyRequest().authenticated();
-                }
-
-        )
+                })
                 .httpBasic(Customizer.withDefaults())
-                .formLogin(Customizer.withDefaults())
                 .authenticationProvider(customAuthenticationProvider)
                 .authenticationProvider(validationPass)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -42,6 +45,8 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults() {

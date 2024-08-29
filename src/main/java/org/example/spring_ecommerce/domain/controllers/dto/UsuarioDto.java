@@ -1,4 +1,4 @@
-package org.example.spring_ecommerce.domain.dto;
+package org.example.spring_ecommerce.domain.controllers.dto;
 
 import lombok.Data;
 import org.example.spring_ecommerce.domain.entities.usuario.Usuario;

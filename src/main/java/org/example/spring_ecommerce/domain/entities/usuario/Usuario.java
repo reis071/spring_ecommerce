@@ -4,19 +4,24 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.spring_ecommerce.domain.entities.Venda;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.util.*;
 
 
-@Entity
 @Data
 @NoArgsConstructor
-public class Usuario  {
+@AllArgsConstructor
+@Builder
+@Entity
+public class Usuario implements UserDetails {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,4 +48,18 @@ public class Usuario  {
         @Transient
         private List<String> permissoes;
 
+        @Override
+        public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of();
+        }
+
+        @Override
+        public String getPassword() {
+                return senha;
+        }
+
+        @Override
+        public String getUsername() {
+                return getEmail();
+        }
 }
