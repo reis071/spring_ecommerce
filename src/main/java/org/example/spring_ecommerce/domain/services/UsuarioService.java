@@ -40,6 +40,7 @@ public class UsuarioService implements UserDetailsService {
         usuario.setSenha(senhaCriptografada);
         repository.save(usuario);
 
+
         List<UsuarioGrupo> listaUsuarioGrupo = grupos.stream().map(nomeGrupo -> {
                     Optional<Grupo> possivelGrupo = grupoRepository.findByNome(nomeGrupo);
                     if (possivelGrupo.isPresent()) {
@@ -54,6 +55,11 @@ public class UsuarioService implements UserDetailsService {
         usuarioGrupoRepository.saveAll(listaUsuarioGrupo);
 
         return usuario;
+    }
+
+    private boolean isAdmin(Usuario usuario) {
+        List<String> permissoes = usuario.getPermissoes();
+        return permissoes.contains("ROLE_ADMIN");
     }
 
     public UserDetails autenticar( Usuario usuario ){

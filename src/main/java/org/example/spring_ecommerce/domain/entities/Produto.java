@@ -1,9 +1,11 @@
 package org.example.spring_ecommerce.domain.entities;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 import java.time.LocalDateTime;
@@ -39,21 +41,20 @@ public class Produto {
     @OneToMany(mappedBy = "produto")
     private List<ItemVenda> itensVenda = new ArrayList<>();
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     @Column(nullable = false)
     private LocalDateTime criadoEm;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", timezone = "UTC")
     @Column(nullable = false)
     private LocalDateTime atualizadoEm;
 
     public Produto() {}
 
-    public Produto(String nome, double preco, Integer estoque,  LocalDateTime criadoEm, LocalDateTime atualizadoEm) {
+    public Produto(String nome, double preco, int estoque, boolean ativo) {
         this.nome = nome;
         this.preco = preco;
         this.estoque = estoque;
-        this.ativo = true;
-        this.criadoEm = criadoEm;
-        this.atualizadoEm = atualizadoEm;
+        this.ativo = ativo;
     }
-
 }

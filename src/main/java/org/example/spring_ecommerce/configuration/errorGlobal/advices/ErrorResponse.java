@@ -1,4 +1,4 @@
-package org.example.spring_ecommerce.configuration.errorGlobal;
+package org.example.spring_ecommerce.configuration.errorGlobal.advices;
 
 public class ErrorResponse {
     private String message;

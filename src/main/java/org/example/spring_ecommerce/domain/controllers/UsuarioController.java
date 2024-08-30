@@ -2,6 +2,7 @@ package org.example.spring_ecommerce.domain.controllers;
 
 import lombok.RequiredArgsConstructor;
 
+import org.example.spring_ecommerce.configuration.errorGlobal.advices.expectionExclusives.UsuarioNaoPodeCriarAdmin;
 import org.example.spring_ecommerce.domain.controllers.dto.CredenciaisDto;
 import org.example.spring_ecommerce.domain.controllers.dto.TokenDto;
 import org.example.spring_ecommerce.domain.controllers.dto.UsuarioDto;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -25,8 +27,17 @@ public class UsuarioController {
     private final JwtService jwtService;
 
     @PostMapping(path = "/add")
+    public ResponseEntity<Usuario> salvarUsuario(@RequestBody UsuarioDto body){
+        if (body.getPermissoes().contains("ADMIN")) {
+            throw new UsuarioNaoPodeCriarAdmin("Usuario não pode criar administrador");
+        }
+            Usuario usuarioSalvo = usuarioService.salvar(body.getUsuario(), body.getPermissoes());
+            return ResponseEntity.ok(usuarioSalvo);
+    }
+
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Usuario> salvar(@RequestBody UsuarioDto body){
+    @PostMapping(path = "/add/adm")
+    public ResponseEntity<Usuario> salvarAdm(@RequestBody UsuarioDto body){
         Usuario usuarioSalvo = usuarioService.salvar(body.getUsuario(), body.getPermissoes());
         return ResponseEntity.ok(usuarioSalvo);
     }

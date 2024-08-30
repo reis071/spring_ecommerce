@@ -18,24 +18,25 @@ import java.util.List;
 
 
 @RestController
+@RequestMapping("vendas")
 public class VendaController {
 
     @Autowired
     private VendaService vendaService;
 
-    @PostMapping(path = "vendas/add")
-    public ResponseEntity<Venda> createVenda(@RequestParam String produtoNome,
+    @PostMapping(path = "/add")
+    public ResponseEntity<Venda> createVenda(@RequestParam String nomeProduto,
                                              @RequestParam(required = false) Integer quantidade,
                                              @RequestParam Long usuarioId,Authentication authentication) {
         try {
-            Venda novaVenda = vendaService.save(produtoNome, quantidade, usuarioId);
+            Venda novaVenda = vendaService.save(nomeProduto, quantidade, usuarioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
         }
     }
 
-    @GetMapping("/vendas")
+    @GetMapping
     public ResponseEntity<List<Venda>> getAllVendas(Authentication authentication) {
         List<Venda> vendas = vendaService.findAll();
         return ResponseEntity.ok(vendas);
@@ -51,7 +52,7 @@ public class VendaController {
         }
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteVenda(@PathVariable Long id) {
         try {
@@ -62,7 +63,7 @@ public class VendaController {
         }
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<Venda> updateVenda(@PathVariable Long id,
                                              @RequestParam String produtoNome,
                                              @RequestParam Integer quantidade,

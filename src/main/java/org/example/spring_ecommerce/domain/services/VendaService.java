@@ -1,14 +1,14 @@
 package org.example.spring_ecommerce.domain.services;
 
+import lombok.RequiredArgsConstructor;
 import org.example.spring_ecommerce.domain.entities.ItemVenda;
 import org.example.spring_ecommerce.domain.entities.Produto;
-import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
 import org.example.spring_ecommerce.domain.entities.Venda;
+import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
 import org.example.spring_ecommerce.domain.repositories.ItemVendaRepository;
 import org.example.spring_ecommerce.domain.repositories.ProdutoRepository;
 import org.example.spring_ecommerce.domain.repositories.UsuarioRepository;
 import org.example.spring_ecommerce.domain.repositories.VendaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class VendaService {
 
     private final ProdutoRepository produtoRepository;
@@ -29,46 +30,29 @@ public class VendaService {
     private final ItemVendaRepository itemVendaRepository;
     private final VendaRepository vendaRepository;
 
-    @Autowired
-    public VendaService(ProdutoRepository produtoRepository, UsuarioRepository usuarioRepository,
-                        ItemVendaRepository itemVendaRepository, VendaRepository vendaRepository) {
-        this.produtoRepository = produtoRepository;
-        this.usuarioRepository = usuarioRepository;
-        this.itemVendaRepository = itemVendaRepository;
-        this.vendaRepository = vendaRepository;
-    }
-
     @CacheEvict(value = "vendaCache", allEntries = true)
     public Venda save(String nomeProd, Integer quantidade, Long usuarioId) {
-        // Verificar se o produto existe pelo nome
         Produto produtoAtual = produtoRepository.findByNome(nomeProd)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
 
-        // Verificar se a quantidade é válida e se o estoque é suficiente
         if (quantidade == null || quantidade <= 0 || quantidade > produtoAtual.getEstoque()) {
             throw new IllegalArgumentException("Quantidade inválida ou estoque insuficiente");
         }
 
-        // Verificar se o usuário existe
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
-        // Criar e salvar a Venda
         Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
         venda = vendaRepository.save(venda);
 
-        // Atualizar o estoque do produto
         produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
         produtoRepository.save(produtoAtual);
 
-        // Criar o ItemVenda e associar à venda
         ItemVenda itemVenda = new ItemVenda(produtoAtual, venda, quantidade);
         venda.getItensVenda().add(itemVenda);
 
-        // Salvar o ItemVenda
         itemVendaRepository.save(itemVenda);
 
-        // Retornar a Venda
         return venda;
     }
 
@@ -77,15 +61,13 @@ public class VendaService {
         return vendaRepository.findAll();
     }
 
+    @Cacheable("vendaCache")
     public Venda findById(Long id) {
         Optional<Venda> vendaOptional = vendaRepository.findById(id);
         return vendaOptional.orElseThrow(() -> new RuntimeException("Venda não encontrada"));
     }
 
-    public  void delete(Long id) {
-        vendaRepository.deleteById(id);
-    }
-
+    @CacheEvict(value = "vendaCache", allEntries = true)
     public Venda update(Long id, String produtoNome, Integer quantidade, Long usuarioId) {
         Venda venda = vendaRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Venda não encontrada"));
@@ -120,18 +102,21 @@ public class VendaService {
         return vendaRepository.save(venda);
     }
 
+    @Cacheable("vendaCache")
     public List<Venda> findVendasByDate(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
         return vendaRepository.findByDataVendaBetween(startOfDay, endOfDay);
     }
 
+    @Cacheable("vendaCache")
     public List<Venda> findVendasByMonth(int year, int month) {
         LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
         return vendaRepository.findByDataVendaBetween(startOfMonth, endOfMonth);
     }
 
+    @Cacheable("vendaCache")
     public List<Venda> findVendasThisWeek() {
         LocalDate now = LocalDate.now();
         LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
@@ -146,5 +131,10 @@ public class VendaService {
                     return !vendaDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) && !vendaDate.getDayOfWeek().equals(DayOfWeek.SUNDAY);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @CacheEvict(value = "vendaCache", allEntries = true)
+    public void delete(Long id) {
+        vendaRepository.deleteById(id);
     }
 }

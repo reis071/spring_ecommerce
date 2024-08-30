@@ -1,5 +1,6 @@
 package org.example.spring_ecommerce.domain.controllers;
 
+import lombok.RequiredArgsConstructor;
 import org.example.spring_ecommerce.domain.entities.Produto;
 import org.example.spring_ecommerce.domain.services.ProdutoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,15 +13,16 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Controller
+
+@RestController
 @RequestMapping("/produtos")
 public class ProdutoController {
 
     @Autowired
     private ProdutoService produtoService;
 
-    @PostMapping("/add")
     @PreAuthorize("hasRole('ADMIN')")
+    @PostMapping("/add")
     public ResponseEntity<Produto> addProduto(@RequestBody Produto produto) {
         Produto novoProduto = produtoService.save(produto);
 
@@ -37,7 +39,7 @@ public class ProdutoController {
         return ResponseEntity.ok(produtoService.findAll());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("atualizar/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Produto> updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
 
@@ -54,12 +56,11 @@ public class ProdutoController {
 
         Produto updatedProduto = produtoService.save(existingProduto);
 
-        // Retorna o produto atualizado
         return ResponseEntity.ok(updatedProduto);
     }
 
-    @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteProduto(@PathVariable Long id) {
         produtoService.deleteById(id);
         return ResponseEntity.noContent().build();
