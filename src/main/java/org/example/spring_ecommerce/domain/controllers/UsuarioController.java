@@ -46,4 +46,16 @@ public class UsuarioController {
             return new TokenDto(usuario.getEmail(), token);
  }
 
+    @PostMapping("/resetar-senha-request")
+    public ResponseEntity<String> requestPasswordReset(@RequestParam String email) {
+        usuarioService.sendPasswordResetEmail(email);
+        return ResponseEntity.ok("Link de reset de senha enviado para o email.");
+    }
+
+    @PostMapping("/resetar-senha")
+    public ResponseEntity<String> resetPassword(@RequestParam String token,
+                                                @RequestParam String newPassword) {
+        usuarioService.resetPassword(token, newPassword);
+        return ResponseEntity.ok("Senha alterada com sucesso.");
+    }
 }

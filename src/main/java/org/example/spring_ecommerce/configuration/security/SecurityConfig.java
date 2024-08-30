@@ -22,7 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfig {
 
-    
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http,
                                                    ValidationPass validationPass,
@@ -32,6 +32,8 @@ public class SecurityConfig {
         return  http.
         csrf(AbstractHttpConfigurer::disable)
         .authorizeHttpRequests(customizer -> {
+                    customizer.requestMatchers("/usuarios/resetar-senha-request").permitAll();
+                    customizer.requestMatchers("/usuarios/resetar-senha").permitAll();
                     customizer.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
