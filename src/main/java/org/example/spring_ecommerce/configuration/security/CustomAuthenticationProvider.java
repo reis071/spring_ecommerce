@@ -1,10 +1,8 @@
 package org.example.spring_ecommerce.configuration.security;
 
 import lombok.RequiredArgsConstructor;
-import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
-import org.example.spring_ecommerce.domain.security.CustomAuthentication;
-import org.example.spring_ecommerce.domain.security.IdentificacaoUsuario;
-import org.example.spring_ecommerce.domain.services.UsuarioService;
+import org.example.spring_ecommerce.model.usuario.Usuario;
+import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;

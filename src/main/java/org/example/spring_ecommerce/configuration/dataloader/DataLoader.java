@@ -1,19 +1,7 @@
 package org.example.spring_ecommerce.configuration.dataloader;
 
 
-import org.example.spring_ecommerce.domain.entities.ItemVenda;
-import org.example.spring_ecommerce.domain.entities.Produto;
-import org.example.spring_ecommerce.domain.entities.Venda;
-import org.example.spring_ecommerce.domain.entities.usuario.Usuario;
-import org.example.spring_ecommerce.domain.repositories.ItemVendaRepository;
-import org.example.spring_ecommerce.domain.repositories.ProdutoRepository;
-import org.example.spring_ecommerce.domain.repositories.UsuarioRepository;
-import org.example.spring_ecommerce.domain.repositories.VendaRepository;
-import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Component
 public class DataLoader {

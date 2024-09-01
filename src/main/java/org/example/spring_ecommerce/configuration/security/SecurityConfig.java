@@ -1,7 +1,7 @@
 package org.example.spring_ecommerce.configuration.security;
 
-import org.example.spring_ecommerce.domain.security.jwt.JwtAuthFilter;
-import org.example.spring_ecommerce.domain.services.UsuarioService;
+import org.example.spring_ecommerce.configuration.security.jwt.JwtAuthFilter;
+import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;

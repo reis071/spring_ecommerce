@@ -3,23 +3,42 @@
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jsr107="http://www.ehcache.org/v3/jsr107"
         xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/v3/ehcache.xsd">
 
-
+    <!-- Definição do cache para Produto -->
     <cache alias="produtoCache">
         <key-type>java.lang.Long</key-type>
-        <value-type>org.example.spring_ecommerce.domain.entities.Produto</value-type>
+        <value-type>org.example.spring_ecommerce.model.Produto</value-type>
+
+        <!-- Expiração do cache após 3 minutos -->
         <expiry>
             <ttl unit="minutes">3</ttl>
         </expiry>
+
+        <!-- Configuração de limites de capacidade -->
+        <resources>
+            <heap unit="entries">100</heap> <!-- Limite na heap -->
+            <offheap unit="MB">50</offheap> <!-- Limite no off-heap -->
+        </resources>
+
+
     </cache>
 
+    <!-- Definição do cache para Venda -->
     <cache alias="vendaCache">
         <key-type>java.lang.Long</key-type>
-        <value-type>org.example.spring_ecommerce.domain.entities.Venda</value-type>
+        <value-type>org.example.spring_ecommerce.model.Venda</value-type>
 
-        <expiry><ttl unit="minutes">3</ttl></expiry>
+        <!-- Expiração do cache após 3 minutos -->
+        <expiry>
+            <ttl unit="minutes">3</ttl>
+        </expiry>
+
+        <!-- Configuração de limites de capacidade -->
+        <resources>
+            <heap unit="entries">100</heap>
+            <offheap unit="MB">50</offheap>
+        </resources>
+
+
     </cache>
-
-
-
 
 </config>
