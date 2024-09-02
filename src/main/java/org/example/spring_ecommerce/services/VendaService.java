@@ -5,6 +5,7 @@ import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.Pr
 import org.example.spring_ecommerce.model.ItemVenda;
 import org.example.spring_ecommerce.model.Produto;
 import org.example.spring_ecommerce.model.Venda;
+import org.example.spring_ecommerce.model.enums.StatusVenda;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 import org.example.spring_ecommerce.repositories.ItemVendaRepository;
 import org.example.spring_ecommerce.repositories.ProdutoRepository;
@@ -40,17 +41,27 @@ public class VendaService {
         if (!produtoAtual.isAtivo()){
             throw new ProdutoInativo();
         }
+
         if (quantidade == null || quantidade <= 0 || quantidade > produtoAtual.getEstoque()) {
             throw new IllegalArgumentException("Quantidade inválida, estoque insuficiente");
-        } else if (!produtoAtual.isAtivo()) {
-            throw new IllegalArgumentException("produto Inativo");
         }
 
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
-        venda = vendaRepository.save(venda);
+        venda.setStatus(StatusVenda.VENDIDO);
+
+        if(usuario.getSaldo() >= (quantidade * produtoAtual.getPreco())){
+            usuario.setSaldo(usuario.getSaldo() - quantidade * produtoAtual.getPreco());
+            usuarioRepository.save(usuario);
+            vendaRepository.save(venda);
+        }
+        else {
+            venda.setStatus(StatusVenda.CANCELADA);
+            vendaRepository.save(venda);
+            throw new IllegalArgumentException("Saldo insuficiente");
+        }
 
         produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
         produtoRepository.save(produtoAtual);
@@ -66,7 +77,7 @@ public class VendaService {
     //retorna todas as vendas
     @Cacheable("vendaCache")
     public List<Venda> findAll() {
-        return vendaRepository.findAll();
+        return  vendaRepository.findAll();
     }
 
 
@@ -90,13 +101,13 @@ public class VendaService {
             throw new IllegalArgumentException("Quantidade inválida ou estoque insuficiente");
         }
 
-        Usuario usuario = usuarioRepository.findById(usuarioId)
+        usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         venda.setDataVenda(LocalDateTime.now());
         venda.setValorTotal(quantidade * produtoAtual.getPreco());
 
-        // Atualizar itens de venda
+
         ItemVenda itemVenda = venda.getItensVenda().stream()
                 .filter(item -> item.getProduto().equals(produtoAtual))
                 .findFirst()
@@ -104,7 +115,6 @@ public class VendaService {
 
         itemVenda.setQuantidade(quantidade);
 
-        // Atualizar estoque do produto
         produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
 
         produtoRepository.save(produtoAtual);

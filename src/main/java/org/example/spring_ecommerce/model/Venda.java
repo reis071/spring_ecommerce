@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.example.spring_ecommerce.model.enums.StatusVenda;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,8 @@ public class Venda {
     @Column(nullable = false)
     private LocalDateTime dataVenda;
 
+    @Column(nullable = false)
+    private StatusVenda status;
 
     @Column(nullable = false)
     private double valorTotal;
@@ -40,6 +43,7 @@ public class Venda {
         this.usuario = usuario;
         this.dataVenda = dataVenda;
         this.valorTotal = valorTotal;
+        this.status = null;
     }
 
 }

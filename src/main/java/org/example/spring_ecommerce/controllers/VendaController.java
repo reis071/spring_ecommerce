@@ -27,12 +27,9 @@ public class VendaController {
     public ResponseEntity<Venda> createVenda(@RequestParam String nomeProduto,
                                              @RequestParam(required = false) Integer quantidade,
                                              @RequestParam Long usuarioId,Authentication authentication) {
-        try {
             Venda novaVenda = vendaService.save(nomeProduto, quantidade, usuarioId);
             return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
-        }
+
     }
 
     @GetMapping

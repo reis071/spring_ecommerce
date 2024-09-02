@@ -9,19 +9,17 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.example.spring_ecommerce.model.Venda;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 
 import java.util.*;
 
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Entity
-public class Usuario{
+public class Usuario {
 
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,6 +29,9 @@ public class Usuario{
         @Column(nullable = false, unique = true)
         private String nome;
 
+
+        @Column
+        private double saldo = 0;
 
         @NotEmpty
         @Column(nullable = false)
@@ -47,6 +48,5 @@ public class Usuario{
 
         @Transient
         private List<String> permissoes;
-
 
 }

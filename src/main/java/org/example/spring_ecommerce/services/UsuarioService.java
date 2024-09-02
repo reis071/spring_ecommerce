@@ -34,6 +34,7 @@ public class UsuarioService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtService jwtService;
+    private final UsuarioRepository usuarioRepository;
 
     //Cadastra Usuario
     public Usuario salvar(Usuario usuario, List<String> grupos){
@@ -128,6 +129,17 @@ public class UsuarioService implements UserDetailsService {
 
         user.setSenha(passwordEncoder.encode(newPassword));
         repository.save(user);
+    }
+
+    public void depositar(double deposito,String email){
+        Usuario usuario = repository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
+        if(deposito > 0){
+            usuario.setSaldo(usuario.getSaldo() + deposito);
+            usuarioRepository.save(usuario);
+        }else{
+            throw new RuntimeException("Saldo não pode ser negativo");
+        }
     }
 
     //verifica se o Usuario esta autenticado

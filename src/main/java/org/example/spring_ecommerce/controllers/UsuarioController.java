@@ -66,4 +66,13 @@ public class UsuarioController {
         usuarioService.resetarSenha(token, novaSenha);
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Senha alterada com sucesso.");
     }
+
+    @PutMapping("depositar")
+    public ResponseEntity<String> depositar(@RequestParam double valor,
+                                            @RequestParam String email) {
+        usuarioService.depositar(valor,email);
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Depositado com sucesso.");
+    }
+
 }
