@@ -23,14 +23,7 @@ public class VendaController {
     @Autowired
     private VendaService vendaService;
 
-    @PostMapping
-    public ResponseEntity<Venda> createVenda(@RequestParam String nomeProduto,
-                                             @RequestParam(required = false) Integer quantidade,
-                                             @RequestParam Long usuarioId,Authentication authentication) {
-            Venda novaVenda = vendaService.save(nomeProduto, quantidade, usuarioId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
 
-    }
 
     @GetMapping
     public ResponseEntity<List<Venda>> getAllVendas(Authentication authentication) {

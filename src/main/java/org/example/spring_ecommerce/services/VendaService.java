@@ -32,47 +32,7 @@ public class VendaService {
     private final ItemVendaRepository itemVendaRepository;
     private final VendaRepository vendaRepository;
 
-    //adiciona venda
-    @CacheEvict(value = "vendaCache", allEntries = true)
-    public Venda save(String nomeProd, Integer quantidade, Long usuarioId) {
-        Produto produtoAtual = produtoRepository.findByNome(nomeProd)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
 
-        if (!produtoAtual.isAtivo()){
-            throw new ProdutoInativo();
-        }
-
-        if (quantidade == null || quantidade <= 0 || quantidade > produtoAtual.getEstoque()) {
-            throw new IllegalArgumentException("Quantidade inválida, estoque insuficiente");
-        }
-
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
-        venda.setStatus(StatusVenda.VENDIDO);
-
-        if(usuario.getSaldo() >= (quantidade * produtoAtual.getPreco())){
-            usuario.setSaldo(usuario.getSaldo() - quantidade * produtoAtual.getPreco());
-            usuarioRepository.save(usuario);
-            vendaRepository.save(venda);
-        }
-        else {
-            venda.setStatus(StatusVenda.CANCELADA);
-            vendaRepository.save(venda);
-            throw new IllegalArgumentException("Saldo insuficiente");
-        }
-
-        produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
-        produtoRepository.save(produtoAtual);
-
-        ItemVenda itemVenda = new ItemVenda(produtoAtual, venda, quantidade);
-        venda.getItensVenda().add(itemVenda);
-
-        itemVendaRepository.save(itemVenda);
-
-        return venda;
-    }
 
     //retorna todas as vendas
     @Cacheable("vendaCache")

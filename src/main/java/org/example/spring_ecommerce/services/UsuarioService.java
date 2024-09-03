@@ -2,15 +2,18 @@ package org.example.spring_ecommerce.services;
 
 import lombok.RequiredArgsConstructor;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ErroAutenticacao;
+import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ProdutoInativo;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.TokenInvalido;
 import org.example.spring_ecommerce.controllers.dto.EmailDto;
 import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
+import org.example.spring_ecommerce.model.ItemVenda;
+import org.example.spring_ecommerce.model.Produto;
+import org.example.spring_ecommerce.model.Venda;
+import org.example.spring_ecommerce.model.enums.StatusVenda;
 import org.example.spring_ecommerce.model.usuario.Grupo;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 import org.example.spring_ecommerce.model.usuario.UsuarioGrupo;
-import org.example.spring_ecommerce.repositories.GrupoRepository;
-import org.example.spring_ecommerce.repositories.UsuarioGrupoRepository;
-import org.example.spring_ecommerce.repositories.UsuarioRepository;
+import org.example.spring_ecommerce.repositories.*;
 import org.example.spring_ecommerce.configuration.security.jwt.JwtService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -20,6 +23,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -28,13 +32,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class UsuarioService implements UserDetailsService {
 
-    private final UsuarioRepository repository;
+    private final ProdutoRepository produtoRepository;
+    private final VendaRepository vendaRepository;
+    private final ItemVendaRepository itemVendaRepository;
+    private final UsuarioRepository usuarioRepository;
     private final GrupoRepository grupoRepository;
     private final UsuarioGrupoRepository usuarioGrupoRepository;
+
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
     private final JwtService jwtService;
-    private final UsuarioRepository usuarioRepository;
+
 
     //Cadastra Usuario
     public Usuario salvar(Usuario usuario, List<String> grupos){
@@ -46,7 +54,7 @@ public class UsuarioService implements UserDetailsService {
                     Optional<Grupo> possivelGrupo = grupoRepository.findByNome(nomeGrupo);
                     if (possivelGrupo.isPresent()) {
                         Grupo grupo = possivelGrupo.get();
-                        repository.save(usuario);
+                        usuarioRepository.save(usuario);
                         return new UsuarioGrupo(usuario, grupo);
                     }
                     throw new IllegalStateException("Grupo não presente");
@@ -73,7 +81,7 @@ public class UsuarioService implements UserDetailsService {
 
     //obtem o usuario com as permissoes
     public Usuario obterUsuarioComPermissoes(String email){
-        Optional<Usuario> usuarioOptional = repository.findByEmail(email);
+        Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
         if(usuarioOptional.isEmpty()){
             return null;
         }
@@ -88,16 +96,14 @@ public class UsuarioService implements UserDetailsService {
     //valida
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Usuario usuario = repository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado na base de dados."));
         return new UsuarioDto(usuario, usuario.getPermissoes());
     }
 
-
-
     //envia token para alterar senha
     public void enviarSolicitacaoDeResetarSenha(String email) {
-        Usuario user = repository.findByEmail(email)
+        Usuario user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
 
         String token = jwtService.gerarToken(user);
@@ -120,7 +126,7 @@ public class UsuarioService implements UserDetailsService {
 
         String email = jwtService.obterLoginUsuario(token);
 
-        Usuario user = repository.findByEmail(email)
+        Usuario user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
         if (usuarioAutenticado(user.getEmail())) {
@@ -128,11 +134,11 @@ public class UsuarioService implements UserDetailsService {
         }
 
         user.setSenha(passwordEncoder.encode(newPassword));
-        repository.save(user);
+        usuarioRepository.save(user);
     }
 
     public void depositar(double deposito,String email){
-        Usuario usuario = repository.findByEmail(email)
+        Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
         if(deposito > 0){
             usuario.setSaldo(usuario.getSaldo() + deposito);
@@ -147,4 +153,46 @@ public class UsuarioService implements UserDetailsService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return authentication != null && authentication.isAuthenticated() && email.equals(authentication.getName());
     }
+
+    public Venda compra(String email, String nomeProd, int quantidade){
+        Produto produtoAtual = produtoRepository.findByNome(nomeProd)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
+
+        if (!produtoAtual.isAtivo()){
+            throw new ProdutoInativo();
+        }
+
+        if (quantidade <= 0 || quantidade > produtoAtual.getEstoque()) {
+            throw new IllegalArgumentException("Quantidade inválida, estoque insuficiente");
+        }
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
+        venda.setStatus(StatusVenda.VENDIDO);
+
+        if(usuario.getSaldo() >= (quantidade * produtoAtual.getPreco())){
+            usuario.setSaldo(usuario.getSaldo() - quantidade * produtoAtual.getPreco());
+            usuarioRepository.save(usuario);
+            vendaRepository.save(venda);
+        }
+        else {
+            venda.setStatus(StatusVenda.CANCELADA);
+            vendaRepository.save(venda);
+            throw new IllegalArgumentException("Saldo insuficiente");
+        }
+
+        produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
+        produtoRepository.save(produtoAtual);
+
+        ItemVenda itemVenda = new ItemVenda(produtoAtual, venda, quantidade);
+        venda.getItensVenda().add(itemVenda);
+
+        itemVendaRepository.save(itemVenda);
+
+        return venda;
+    }
+
 }
+

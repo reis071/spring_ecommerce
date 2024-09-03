@@ -6,6 +6,7 @@ import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.Us
 import org.example.spring_ecommerce.controllers.dto.CredenciaisDto;
 import org.example.spring_ecommerce.controllers.dto.TokenDto;
 import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
+import org.example.spring_ecommerce.model.Venda;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 import org.example.spring_ecommerce.configuration.security.jwt.JwtService;
 import org.example.spring_ecommerce.services.UsuarioService;
@@ -13,6 +14,7 @@ import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
@@ -75,4 +77,13 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Depositado com sucesso.");
     }
 
+    @PostMapping("comprar")
+    public ResponseEntity<Venda> createVenda(@RequestParam String email,
+                                             @RequestParam String nomeProduto,
+                                             @RequestParam int quantidade) {
+
+        Venda novaVenda = usuarioService.compra(email, nomeProduto, quantidade);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
+
+    }
 }
