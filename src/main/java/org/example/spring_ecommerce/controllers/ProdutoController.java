@@ -19,8 +19,8 @@ public class ProdutoController {
     @Autowired
     private ProdutoService produtoService;
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Produto> addProduto(@RequestBody Produto produto) {
         Produto novoProduto = produtoService.save(produto);
 

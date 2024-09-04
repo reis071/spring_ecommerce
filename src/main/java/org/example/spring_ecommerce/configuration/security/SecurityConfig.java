@@ -34,12 +34,13 @@ public class SecurityConfig {
         .authorizeHttpRequests(customizer -> {
                     customizer.requestMatchers("/usuarios/resetar-senha-request").permitAll();
                     customizer.requestMatchers("/usuarios/resetar-senha").permitAll();
+                    customizer.requestMatchers("/usuarios/autenticar").permitAll();
                     customizer.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
-                .authenticationProvider(customAuthenticationProvider)
-                .authenticationProvider(validationPass)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .authenticationProvider(validationPass)
+                .authenticationProvider(customAuthenticationProvider)
                 .build();
     }
 

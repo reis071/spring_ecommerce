@@ -18,6 +18,7 @@ public class UsuarioDto implements UserDetails {
 
     private List<String> permissoes;
 
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of();
@@ -32,4 +33,6 @@ public class UsuarioDto implements UserDetails {
     public String getUsername() {
         return usuario.getEmail();
     }
+
+
 }

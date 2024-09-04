@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ErroAutenticacao;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ProdutoInativo;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.TokenInvalido;
+import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.UsuarioNaoAutenticado;
 import org.example.spring_ecommerce.controllers.dto.EmailDto;
 import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.model.ItemVenda;
@@ -28,8 +29,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class UsuarioService implements UserDetailsService {
 
     private final ProdutoRepository produtoRepository;
@@ -140,11 +141,14 @@ public class UsuarioService implements UserDetailsService {
     public void depositar(double deposito,String email){
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
+        if(usuarioAutenticado(usuario.getEmail())){
+
         if(deposito > 0){
             usuario.setSaldo(usuario.getSaldo() + deposito);
             usuarioRepository.save(usuario);
         }else{
             throw new RuntimeException("Saldo não pode ser negativo");
+        }
         }
     }
 
@@ -154,7 +158,14 @@ public class UsuarioService implements UserDetailsService {
         return authentication != null && authentication.isAuthenticated() && email.equals(authentication.getName());
     }
 
+    //fazer compra
     public Venda compra(String email, String nomeProd, int quantidade){
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+
+        if (usuarioAutenticado(usuario.getEmail())){
+
+
         Produto produtoAtual = produtoRepository.findByNome(nomeProd)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
 
@@ -166,8 +177,6 @@ public class UsuarioService implements UserDetailsService {
             throw new IllegalArgumentException("Quantidade inválida, estoque insuficiente");
         }
 
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
         Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
         venda.setStatus(StatusVenda.VENDIDO);
@@ -192,6 +201,8 @@ public class UsuarioService implements UserDetailsService {
         itemVendaRepository.save(itemVenda);
 
         return venda;
+        }
+        throw new UsuarioNaoAutenticado();
     }
 
 }

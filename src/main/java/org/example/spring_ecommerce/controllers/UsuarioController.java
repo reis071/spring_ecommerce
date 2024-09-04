@@ -45,7 +45,7 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.CREATED).body(usuarioSalvo);
     }
 
-    @PostMapping
+    @PostMapping("/autenticar")
     public ResponseEntity<TokenDto> autenticar(@RequestBody CredenciaisDto credenciais){
             Usuario usuario = Usuario.builder()
                     .email(credenciais.getEmail())
@@ -79,10 +79,10 @@ public class UsuarioController {
 
     @PostMapping("comprar")
     public ResponseEntity<Venda> createVenda(@RequestParam String email,
-                                             @RequestParam String nomeProduto,
+                                            @RequestParam String nomeProduto,
                                              @RequestParam int quantidade) {
 
-        Venda novaVenda = usuarioService.compra(email, nomeProduto, quantidade);
+        Venda novaVenda = usuarioService.compra(email,nomeProduto, quantidade);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
 
     }
