@@ -38,9 +38,9 @@ public class SecurityConfig {
                     customizer.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .authenticationProvider(validationPass)
                 .authenticationProvider(customAuthenticationProvider)
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

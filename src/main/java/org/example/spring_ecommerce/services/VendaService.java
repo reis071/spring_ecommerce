@@ -42,10 +42,8 @@ public class VendaService {
 
 
     //retorna uma venda por id
-    @Cacheable("vendaCache")
-    public Venda findById(Long id) {
-        Optional<Venda> vendaOptional = vendaRepository.findById(id);
-        return vendaOptional.orElseThrow(() -> new RuntimeException("Venda não encontrada"));
+    public List<Venda> buscarVendasPorEmail(String email) {
+        return vendaRepository.findByUsuarioEmail(email);
     }
 
     //atualiza uma venda
@@ -85,23 +83,39 @@ public class VendaService {
 
     //relatorio vendas por data
     @Cacheable("vendaCache")
-    public List<Venda> vendasPorDia(LocalDate date) {
+    public String vendasPorDia(LocalDate date) {
         LocalDateTime startOfDay = date.atStartOfDay();
         LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
-        return vendaRepository.findByDataVendaBetween(startOfDay, endOfDay);
+        List<Venda> vendaRel = vendaRepository.findByDataVendaBetween(startOfDay, endOfDay);
+
+        int totalVendas = vendaRel.size();
+        double rendaTotal = 0.0;
+
+        for (Venda venda : vendaRel) {
+            rendaTotal += venda.getValorTotal();
+        }
+        return  "{total vendas: " + totalVendas  +", renda total: " + rendaTotal + "}";
     }
 
     //relatorio vendas por mes
     @Cacheable("vendaCache")
-    public List<Venda> vendasPorMes(int year, int month) {
+    public String vendasPorMes(int year, int month) {
+
         LocalDateTime startOfMonth = LocalDate.of(year, month, 1).atStartOfDay();
         LocalDateTime endOfMonth = startOfMonth.plusMonths(1).minusNanos(1);
-        return vendaRepository.findByDataVendaBetween(startOfMonth, endOfMonth);
+        List<Venda> vendaRel =  vendaRepository.findByDataVendaBetween(startOfMonth, endOfMonth);
+        int totalVendas = vendaRel.size();
+        double rendaTotal = 0.0;
+
+        for (Venda venda : vendaRel) {
+            rendaTotal += venda.getValorTotal();
+        }
+        return  "{total vendas: " + totalVendas  +", renda total: " + rendaTotal + "}";
     }
 
     // relatorio venda por semana
     @Cacheable("vendaCache")
-    public List<Venda> vendasPorSemanaAtual() {
+    public String vendasPorSemanaAtual() {
         LocalDate now = LocalDate.now();
         LocalDate startOfWeek = now.with(DayOfWeek.MONDAY);
         LocalDate endOfWeek = now.with(DayOfWeek.SUNDAY);
@@ -109,12 +123,21 @@ public class VendaService {
         LocalDateTime startOfWeekDateTime = startOfWeek.atStartOfDay();
         LocalDateTime endOfWeekDateTime = endOfWeek.atTime(LocalTime.MAX);
 
-        return vendaRepository.findByDataVendaBetween(startOfWeekDateTime, endOfWeekDateTime).stream()
+        List<Venda> vendaRel = vendaRepository.findByDataVendaBetween(startOfWeekDateTime, endOfWeekDateTime).stream()
                 .filter(venda -> {
                     LocalDate vendaDate = venda.getDataVenda().toLocalDate();
                     return !vendaDate.getDayOfWeek().equals(DayOfWeek.SATURDAY) && !vendaDate.getDayOfWeek().equals(DayOfWeek.SUNDAY);
                 })
                 .collect(Collectors.toList());
+
+        int totalVendas = vendaRel.size();
+        double rendaTotal = 0.0;
+
+        for (Venda venda : vendaRel) {
+            rendaTotal += venda.getValorTotal();
+        }
+
+        return  "{total vendas: " + totalVendas  +", renda total: " + rendaTotal + "}";
     }
 
     //deletar venda

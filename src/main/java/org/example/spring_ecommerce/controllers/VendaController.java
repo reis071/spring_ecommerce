@@ -24,21 +24,16 @@ public class VendaController {
     private VendaService vendaService;
 
 
-
     @GetMapping
-    public ResponseEntity<List<Venda>> getAllVendas(Authentication authentication) {
+    public ResponseEntity<List<Venda>> pegarTodasVendas(Authentication authentication) {
         List<Venda> vendas = vendaService.findAll();
         return ResponseEntity.status(HttpStatus.OK).body(vendas);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Venda> getVendaById(@PathVariable Long id) {
-        try {
-            Venda venda = vendaService.findById(id);
-            return ResponseEntity.status(HttpStatus.OK).body(venda);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    @GetMapping("/buscarVenda")
+    public ResponseEntity<List<Venda>> buscarVendasPorEmail(@RequestParam String email) {
+        List<Venda> vendas = vendaService.buscarVendasPorEmail(email);
+        return ResponseEntity.ok(vendas);
     }
 
     @DeleteMapping("/{id}")
@@ -66,20 +61,20 @@ public class VendaController {
     }
 
     @GetMapping("/relatorioPorData")
-    public ResponseEntity<List<Venda>> getVendasByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
-        List<Venda> vendas = vendaService.vendasPorDia(data);
+    public ResponseEntity<String> getVendasByDate(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
+        String vendas = vendaService.vendasPorDia(data);
         return ResponseEntity.status(HttpStatus.OK).body(vendas);
     }
 
     @GetMapping("/relatorioPorMesAno")
-    public ResponseEntity<List<Venda>> getVendasByMonth(@RequestParam int ano, @RequestParam int mes) {
-        List<Venda> vendas = vendaService.vendasPorMes(ano, mes);
+    public ResponseEntity<String> getVendasByMonth(@RequestParam int ano, @RequestParam int mes) {
+        String vendas = vendaService.vendasPorMes(ano, mes);
         return ResponseEntity.status(HttpStatus.OK).body(vendas);
     }
 
     @GetMapping("/relatorioPorSemanaAtual")
-    public ResponseEntity<List<Venda>> getVendasThisWeek() {
-        List<Venda> vendas = vendaService.vendasPorSemanaAtual();
+    public ResponseEntity<String> getVendasThisWeek() {
+        String vendas = vendaService.vendasPorSemanaAtual();
         return ResponseEntity.status(HttpStatus.OK).body(vendas);
     }
 
