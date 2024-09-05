@@ -4,6 +4,7 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -23,19 +24,20 @@ public class JwtService {
     @Value("${security.jwt.chave}")
     private String chave;
 
-    public String gerarToken( Usuario usuario ){
+    public String gerarToken(UsuarioDto usuarioDto) {
         long expString = Long.valueOf(expiracao);
         LocalDateTime dataHoraExpiracao = LocalDateTime.now().plusMinutes(expString);
         Instant instant = dataHoraExpiracao.atZone(ZoneId.systemDefault()).toInstant();
         Date data = Date.from(instant);
 
-        return Jwts
-                .builder()
-                .setSubject(usuario.getEmail())
+        return Jwts.builder()
+                .setSubject(usuarioDto.getUsername())
+                .claim("roles", usuarioDto.getPermissoes()) // Usa permissões do UsuarioDto
                 .setExpiration(data)
-                .signWith( SignatureAlgorithm.HS512, chave )
+                .signWith(SignatureAlgorithm.HS512, chave)
                 .compact();
     }
+
 
     private Claims obterClaims( String token ) throws ExpiredJwtException {
         return Jwts

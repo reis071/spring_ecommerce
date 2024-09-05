@@ -80,26 +80,25 @@ public class UsuarioService implements UserDetailsService {
         throw new ErroAutenticacao();
     }
 
-    //obtem o usuario com as permissoes
-    public Usuario obterUsuarioComPermissoes(String email){
+    public UsuarioDto obterUsuarioComPermissoes(String email) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
-        if(usuarioOptional.isEmpty()){
+        if (usuarioOptional.isEmpty()) {
             return null;
         }
 
         Usuario usuario = usuarioOptional.get();
         List<String> permissoes = usuarioGrupoRepository.findPermissoesByUsuario(usuario);
-        usuario.setPermissoes(permissoes);
-
-        return usuario;
+        return new UsuarioDto(usuario, permissoes); // Retorna um UsuarioDto com permissões
     }
 
     //valida
+
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado na base de dados."));
-        return new UsuarioDto(usuario, usuario.getPermissoes());
+        List<String> permissoes = usuarioGrupoRepository.findPermissoesByUsuario(usuario);
+        return new UsuarioDto(usuario, permissoes); // Retorna um UsuarioDto com permissões
     }
 
     //envia token para alterar senha
@@ -107,7 +106,7 @@ public class UsuarioService implements UserDetailsService {
         Usuario user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
 
-        String token = jwtService.gerarToken(user);
+        String token = jwtService.gerarToken(new UsuarioDto(user,user.getPermissoes()));
 
         EmailDto emailDtoDetails = new EmailDto(
                 user.getEmail(),

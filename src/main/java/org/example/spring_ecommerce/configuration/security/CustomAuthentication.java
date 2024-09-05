@@ -1,5 +1,6 @@
 package org.example.spring_ecommerce.configuration.security;
 
+import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,9 +10,10 @@ import java.util.stream.Collectors;
 
 public class CustomAuthentication implements Authentication {
 
-    private final IdentificacaoUsuario identificacaoUsuario;
+    private final UsuarioDto identificacaoUsuario;
 
-    public CustomAuthentication(IdentificacaoUsuario identificacaoUsuario) {
+
+    public CustomAuthentication(UsuarioDto identificacaoUsuario) {
         if(identificacaoUsuario == null){
             throw new ExceptionInInitializerError("Não é possível criar um customauthentication sem a identificacao do usuario");
         }
@@ -55,6 +57,6 @@ public class CustomAuthentication implements Authentication {
 
     @Override
     public String getName() {
-        return this.identificacaoUsuario.getNome();
+        return this.identificacaoUsuario.getUsername();
     }
 }

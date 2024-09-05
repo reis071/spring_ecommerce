@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,29 +29,22 @@ public class JwtAuthFilter  extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest httpServletRequest,
-            HttpServletResponse httpServletResponse,
-            FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String authorization = request.getHeader("Authorization");
 
-        String authorization = httpServletRequest.getHeader("Authorization");
-
-        if( authorization != null && authorization.startsWith("Bearer")){
+        if (authorization != null && authorization.startsWith("Bearer")) {
             String token = authorization.split(" ")[1];
             boolean isValid = jwtService.tokenValido(token);
 
-            if(isValid){
-                String loginUsuario = jwtService.obterLoginUsuario(token);
-                UserDetails usuario = usuarioService.loadUserByUsername(loginUsuario);
-                UsernamePasswordAuthenticationToken user = new
-                        UsernamePasswordAuthenticationToken(usuario,null,
-                        usuario.getAuthorities());
-                user.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
-                SecurityContextHolder.getContext().setAuthentication(user);
+            if (isValid) {
+                String username = jwtService.obterLoginUsuario(token);
+                UsuarioDto usuarioDto = (UsuarioDto) usuarioService.loadUserByUsername(username);
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(usuarioDto, null, usuarioDto.getAuthorities());
+                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
 
-        filterChain.doFilter(httpServletRequest, httpServletResponse);
-
+        filterChain.doFilter(request, response);
     }
 }

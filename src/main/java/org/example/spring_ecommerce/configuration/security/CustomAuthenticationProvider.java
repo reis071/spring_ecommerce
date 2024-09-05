@@ -1,6 +1,7 @@
 package org.example.spring_ecommerce.configuration.security;
 
 import lombok.RequiredArgsConstructor;
+import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.model.usuario.Usuario;
 import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -23,24 +24,21 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
         String login = authentication.getName();
         String senha = (String) authentication.getCredentials();
 
-        Usuario usuario = usuarioService.obterUsuarioComPermissoes(login);
-        if(usuario != null){
-            boolean senhasBatem = passwordEncoder.matches(senha, usuario.getSenha());
+        UsuarioDto usuario = usuarioService.obterUsuarioComPermissoes(login);
 
-            if(senhasBatem){
-                IdentificacaoUsuario identificacaoUsuario = new IdentificacaoUsuario(
-                        usuario.getId(),
-                        usuario.getNome(),
-                        usuario.getEmail(),
-                        usuario.getPermissoes()
-                );
+        if (usuario != null) {
+            boolean senhasBatem = passwordEncoder.matches(senha, usuario.getPassword());
+
+            if (senhasBatem) {
+                UsuarioDto identificacaoUsuario = new UsuarioDto(usuario.getUsuario(), usuario.getPermissoes());
 
                 return new CustomAuthentication(identificacaoUsuario);
             }
         }
-
-        return null;
+        return authentication;
     }
+
+
 
     @Override
     public boolean supports(Class<?> authentication) {

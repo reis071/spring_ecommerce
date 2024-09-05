@@ -52,7 +52,7 @@ public class UsuarioController {
                     .senha(credenciais.getSenha()).build();
 
             usuarioService.autenticar(usuario);
-            String token = jwtService.gerarToken(usuario);
+            String token = jwtService.gerarToken(new UsuarioDto(usuario,usuario.getPermissoes()));
             return  ResponseEntity.status(HttpStatus.OK).body(new TokenDto(usuario.getEmail(), token));
  }
 

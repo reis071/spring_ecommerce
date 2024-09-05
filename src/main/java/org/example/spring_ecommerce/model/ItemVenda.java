@@ -2,7 +2,9 @@ package org.example.spring_ecommerce.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.Data;
 
+@Data
 @Entity
 public class ItemVenda {
 
@@ -49,17 +51,6 @@ public class ItemVenda {
     }
 
 
-    public void setProduto(Produto produto) {
-        this.produto = produto;
-    }
-
-    public void setVenda(Venda venda) {
-        this.venda = venda;
-    }
-
-    public void setQuantidade(Integer quantidade) {
-        this.quantidade = quantidade;
-    }
 
 
 }
