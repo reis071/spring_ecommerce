@@ -35,6 +35,7 @@ public class SecurityConfig {
                     customizer.requestMatchers("/usuarios/resetar-senha-request").permitAll();
                     customizer.requestMatchers("/usuarios/resetar-senha").permitAll();
                     customizer.requestMatchers("/usuarios/autenticar").permitAll();
+                    customizer.requestMatchers("/usuarios/user").permitAll();
                     customizer.anyRequest().authenticated();
                 })
                 .httpBasic(Customizer.withDefaults())

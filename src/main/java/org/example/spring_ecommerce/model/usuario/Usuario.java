@@ -26,7 +26,7 @@ public class Usuario {
         private Long id;
 
         @NotEmpty
-        @Column(nullable = false, unique = true)
+        @Column(nullable = false)
         private String nome;
 
 

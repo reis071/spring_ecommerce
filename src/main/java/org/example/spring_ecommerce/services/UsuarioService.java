@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ErroAutenticacao;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.ProdutoInativo;
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.TokenInvalido;
-import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.UsuarioNaoAutenticado;
 import org.example.spring_ecommerce.controllers.dto.EmailDto;
 import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.model.ItemVenda;
@@ -106,7 +105,7 @@ public class UsuarioService implements UserDetailsService {
         Usuario user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
 
-        String token = jwtService.gerarToken(new UsuarioDto(user,user.getPermissoes()));
+        String token = jwtService.gerarToken    (new UsuarioDto(user,user.getPermissoes()));
 
         EmailDto emailDtoDetails = new EmailDto(
                 user.getEmail(),
@@ -137,17 +136,18 @@ public class UsuarioService implements UserDetailsService {
         usuarioRepository.save(user);
     }
 
-    public void depositar(double deposito,String email){
+    public void depositar(double deposito){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
         Usuario usuario = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
-        if(usuarioAutenticado(usuario.getEmail())){
 
-        if(deposito > 0){
+        if (deposito > 0) {
             usuario.setSaldo(usuario.getSaldo() + deposito);
             usuarioRepository.save(usuario);
-        }else{
+        } else {
             throw new RuntimeException("Saldo não pode ser negativo");
-        }
         }
     }
 
@@ -158,12 +158,12 @@ public class UsuarioService implements UserDetailsService {
     }
 
     //fazer compra
-    public Venda compra(String email, String nomeProd, int quantidade){
+    public Venda compra( String nomeProd, int quantidade){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();  // Obtém o email a partir do token JWT
+
         Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
-
-        if (usuarioAutenticado(usuario.getEmail())){
-
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
 
         Produto produtoAtual = produtoRepository.findByNome(nomeProd)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
@@ -201,8 +201,6 @@ public class UsuarioService implements UserDetailsService {
 
         return venda;
         }
-        throw new UsuarioNaoAutenticado();
-    }
 
 }
 

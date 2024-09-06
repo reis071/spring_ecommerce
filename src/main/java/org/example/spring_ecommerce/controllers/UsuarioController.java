@@ -3,8 +3,7 @@ package org.example.spring_ecommerce.controllers;
 import lombok.RequiredArgsConstructor;
 
 import org.example.spring_ecommerce.configuration.advices.exceptionExclusives.UsuarioNaoPodeCriarAdmin;
-import org.example.spring_ecommerce.controllers.dto.CredenciaisDto;
-import org.example.spring_ecommerce.controllers.dto.TokenDto;
+
 import org.example.spring_ecommerce.controllers.dto.UsuarioDto;
 import org.example.spring_ecommerce.model.Venda;
 import org.example.spring_ecommerce.model.usuario.Usuario;
@@ -14,11 +13,8 @@ import org.example.spring_ecommerce.services.UsuarioService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/usuarios")
@@ -29,13 +25,13 @@ public class UsuarioController {
     private final JwtService jwtService;
 
     @PostMapping(path = "/user")
-    public ResponseEntity<String> salvarUsuario(@RequestBody UsuarioDto body) {
+    public ResponseEntity<Usuario> salvarUsuario(@RequestBody UsuarioDto body) {
         if (body.getPermissoes().contains("ADMIN")) {
             throw new UsuarioNaoPodeCriarAdmin();
         }
-        usuarioService.salvar(body.getUsuario(), body.getPermissoes());
+        Usuario usuario = usuarioService.salvar(body.getUsuario(), body.getPermissoes());
 
-        return ResponseEntity.ok("Usuario salvo com sucesso");
+        return ResponseEntity.ok(usuario);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -46,14 +42,14 @@ public class UsuarioController {
     }
 
     @PostMapping("/autenticar")
-    public ResponseEntity<TokenDto> autenticar(@RequestBody CredenciaisDto credenciais){
+            public ResponseEntity<String> autenticar(@RequestParam String email, @RequestParam String senha){
             Usuario usuario = Usuario.builder()
-                    .email(credenciais.getEmail())
-                    .senha(credenciais.getSenha()).build();
+                    .email(email)
+                    .senha(senha).build();
 
             usuarioService.autenticar(usuario);
             String token = jwtService.gerarToken(new UsuarioDto(usuario,usuario.getPermissoes()));
-            return  ResponseEntity.status(HttpStatus.OK).body(new TokenDto(usuario.getEmail(), token));
+            return  ResponseEntity.status(HttpStatus.OK).body("Token gerado com sucesso:" + token);
  }
 
     @PostMapping("/resetar-senha-request")
@@ -70,19 +66,17 @@ public class UsuarioController {
     }
 
     @PutMapping("depositar")
-    public ResponseEntity<String> depositar(@RequestParam double valor,
-                                            @RequestParam String email) {
-        usuarioService.depositar(valor,email);
+    public ResponseEntity<String> depositar(@RequestParam double valor) {
+        usuarioService.depositar(valor);
 
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Depositado com sucesso.");
     }
 
     @PostMapping("comprar")
-    public ResponseEntity<Venda> createVenda(@RequestParam String email,
-                                            @RequestParam String nomeProduto,
+    public ResponseEntity<Venda> createVenda(@RequestParam String nomeProduto,
                                              @RequestParam int quantidade) {
 
-        Venda novaVenda = usuarioService.compra(email,nomeProduto, quantidade);
+        Venda novaVenda = usuarioService.compra(nomeProduto, quantidade);
         return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
 
     }
