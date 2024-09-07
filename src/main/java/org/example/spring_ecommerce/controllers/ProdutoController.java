@@ -27,9 +27,9 @@ public class ProdutoController {
         return ResponseEntity.status(HttpStatus.CREATED).body(novoProduto);
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Produto> getProduto(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(produtoService.findById(id));
+    @GetMapping("/procurarProduto")
+    public ResponseEntity<Produto> getProduto(@RequestParam String nomeProduto) {
+        return ResponseEntity.status(HttpStatus.OK).body(produtoService.procurarProdutoPorNome(nomeProduto));
     }
 
     @GetMapping
@@ -40,28 +40,15 @@ public class ProdutoController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<Produto> updateProduto(@PathVariable Long id, @RequestBody Produto produto) {
-
-        Produto existingProduto = produtoService.findById(id);
-
-        if (existingProduto == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        existingProduto.setNome(produto.getNome());
-        existingProduto.setPreco(produto.getPreco());
-        existingProduto.setAtivo(produto.isAtivo());
-        existingProduto.setAtualizadoEm(LocalDateTime.now()); // Atualiza a data de modificação
-
-        Produto updatedProduto = produtoService.save(existingProduto);
-
-        return ResponseEntity.status(HttpStatus.OK).body(updatedProduto);
+    public ResponseEntity<Produto> atualizarProduto(@PathVariable Long id, @RequestBody Produto produtoAtualizado) {
+        Produto produtoAtualizadoRetorno = produtoService.atualizarProduto(id, produtoAtualizado);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body(produtoAtualizadoRetorno);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteProduto(@PathVariable Long id) {
-        produtoService.deleteById(id);
+    @DeleteMapping("/deletarProduto")
+    public ResponseEntity<Void> deleteProduto(@RequestParam String nomeProduto) {
+        produtoService.deleteById(nomeProduto);
         return ResponseEntity.noContent().build();
     }
 

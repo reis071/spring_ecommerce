@@ -35,8 +35,8 @@ public class ProdutoService {
 
     //retorna produto por id
     @Cacheable("produtoCache")
-    public Produto findById(Long id) {
-        return produtoRepository.findById(id).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+    public Produto procurarProdutoPorNome(String nomeProduto) {
+        return produtoRepository.findByNome(nomeProduto).orElseThrow(() -> new RuntimeException("Produto não encontrado"));
     }
 
     //retorna todos os produtos
@@ -47,14 +47,31 @@ public class ProdutoService {
 
     //deleta ou inativa o produto
     @Cacheable("produtoCache")
-    public void deleteById(Long id) {
-        Produto produto = findById(id);
+    public void deleteById(String nomeProduto) {
+        Produto produto = procurarProdutoPorNome(nomeProduto);
         if (!produto.getItensVenda().isEmpty()) {
 
             produto.setAtivo(false);
             produtoRepository.save(produto);
         } else {
-            produtoRepository.deleteById(id);
+            produtoRepository.deleteById(produto.getId());
         }
     }
+
+    // Atualiza um produto existente
+    @CacheEvict(value = "produtoCache", key = "#produto.id")
+    public Produto atualizarProduto(Long id, Produto produtoAtualizado) {
+        Produto produtoExistente = produtoRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
+
+        produtoExistente.setNome(produtoAtualizado.getNome());
+        produtoExistente.setDescricao(produtoAtualizado.getDescricao());
+        produtoExistente.setPreco(produtoAtualizado.getPreco());
+        produtoExistente.setEstoque(produtoAtualizado.getEstoque());
+        produtoExistente.setAtualizadoEm(LocalDateTime.now());
+
+        return produtoRepository.save(produtoExistente);
+    }
+
+
 }

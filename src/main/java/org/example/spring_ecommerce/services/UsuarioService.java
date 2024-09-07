@@ -32,9 +32,7 @@ import java.util.stream.Collectors;
 @Service
 public class UsuarioService implements UserDetailsService {
 
-    private final ProdutoRepository produtoRepository;
-    private final VendaRepository vendaRepository;
-    private final ItemVendaRepository itemVendaRepository;
+
     private final UsuarioRepository usuarioRepository;
     private final GrupoRepository grupoRepository;
     private final UsuarioGrupoRepository usuarioGrupoRepository;
@@ -79,6 +77,7 @@ public class UsuarioService implements UserDetailsService {
         throw new ErroAutenticacao();
     }
 
+    //Ver a permissão do usuario
     public UsuarioDto obterUsuarioComPermissoes(String email) {
         Optional<Usuario> usuarioOptional = usuarioRepository.findByEmail(email);
         if (usuarioOptional.isEmpty()) {
@@ -91,7 +90,6 @@ public class UsuarioService implements UserDetailsService {
     }
 
     //valida
-
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Usuario usuario = usuarioRepository.findByEmail(email)
@@ -128,11 +126,8 @@ public class UsuarioService implements UserDetailsService {
         Usuario user = usuarioRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado: " + email));
 
-        if (usuarioAutenticado(user.getEmail())) {
-            throw new IllegalStateException("Usuário está logado e não pode alterar a senha.");
-        }
-
         user.setSenha(passwordEncoder.encode(newPassword));
+
         usuarioRepository.save(user);
     }
 
@@ -151,56 +146,8 @@ public class UsuarioService implements UserDetailsService {
         }
     }
 
-    //verifica se o Usuario esta autenticado
-    private boolean usuarioAutenticado(String email) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return authentication != null && authentication.isAuthenticated() && email.equals(authentication.getName());
-    }
-
-    //fazer compra
-    public Venda compra( String nomeProd, int quantidade){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();  // Obtém o email a partir do token JWT
-
-        Usuario usuario = usuarioRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
-
-        Produto produtoAtual = produtoRepository.findByNome(nomeProd)
-                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado"));
-
-        if (!produtoAtual.isAtivo()){
-            throw new ProdutoInativo();
-        }
-
-        if (quantidade <= 0 || quantidade > produtoAtual.getEstoque()) {
-            throw new IllegalArgumentException("Quantidade inválida, estoque insuficiente");
-        }
 
 
-        Venda venda = new Venda(usuario, LocalDateTime.now(), quantidade * produtoAtual.getPreco());
-        venda.setStatus(StatusVenda.VENDIDO);
-
-        if(usuario.getSaldo() >= (quantidade * produtoAtual.getPreco())){
-            usuario.setSaldo(usuario.getSaldo() - quantidade * produtoAtual.getPreco());
-            usuarioRepository.save(usuario);
-            vendaRepository.save(venda);
-        }
-        else {
-            venda.setStatus(StatusVenda.CANCELADA);
-            vendaRepository.save(venda);
-            throw new IllegalArgumentException("Saldo insuficiente");
-        }
-
-        produtoAtual.setEstoque(produtoAtual.getEstoque() - quantidade);
-        produtoRepository.save(produtoAtual);
-
-        ItemVenda itemVenda = new ItemVenda(produtoAtual, venda, quantidade);
-        venda.getItensVenda().add(itemVenda);
-
-        itemVendaRepository.save(itemVenda);
-
-        return venda;
-        }
 
 }
 

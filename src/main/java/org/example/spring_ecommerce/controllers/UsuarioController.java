@@ -72,12 +72,4 @@ public class UsuarioController {
         return ResponseEntity.status(HttpStatus.ACCEPTED).body("Depositado com sucesso.");
     }
 
-    @PostMapping("comprar")
-    public ResponseEntity<Venda> createVenda(@RequestParam String nomeProduto,
-                                             @RequestParam int quantidade) {
-
-        Venda novaVenda = usuarioService.compra(nomeProduto, quantidade);
-        return ResponseEntity.status(HttpStatus.CREATED).body(novaVenda);
-
-    }
 }

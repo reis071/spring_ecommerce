@@ -8,11 +8,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.example.spring_ecommerce.model.Carrinho;
 import org.example.spring_ecommerce.model.Venda;
 
-
 import java.util.*;
-
 
 @Data
 @Builder
@@ -29,7 +28,6 @@ public class Usuario {
         @Column(nullable = false)
         private String nome;
 
-
         @Column
         private double saldo = 0;
 
@@ -42,6 +40,10 @@ public class Usuario {
         @Column(nullable = false, unique = true)
         private String email;
 
+        @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+        @JsonIgnore
+        private Carrinho carrinho;
+
         @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
         @JsonIgnore // Prevent serialization issues
         private List<Venda> vendas = new ArrayList<>();
@@ -49,4 +51,16 @@ public class Usuario {
         @Transient
         private List<String> permissoes;
 
+        @Override
+        public boolean equals(Object o) {
+                if (this == o) return true;
+                if (o == null || getClass() != o.getClass()) return false;
+                Usuario usuario = (Usuario) o;
+                return Objects.equals(id, usuario.id);
+        }
+
+        @Override
+        public int hashCode() {
+                return Objects.hash(id);
+        }
 }
