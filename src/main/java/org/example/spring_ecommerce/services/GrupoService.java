@@ -9,7 +9,7 @@ import java.util.List;
 @Service
 public class GrupoService {
 
-    private GrupoRepository grupoRepository;
+    private final GrupoRepository grupoRepository;
 
     public GrupoService(GrupoRepository grupoRepository) {
         this.grupoRepository = grupoRepository;

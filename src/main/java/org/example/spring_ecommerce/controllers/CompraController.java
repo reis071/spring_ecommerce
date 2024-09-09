@@ -40,13 +40,19 @@ public class CompraController {
     }
 
     @DeleteMapping("remover-produto-carrinho")
-    public ResponseEntity<Void> removerProdutoDoCarrinhoPorNome(@RequestParam String nomeProduto) {
-        compraService.removerProdutoDoCarrinhoPorNome(nomeProduto);
+    public ResponseEntity<Void> removerProdutoDoCarrinhoPorNome(@RequestParam String nomeProduto,
+                                                                @RequestParam int quantidade) {
+        compraService.removerProdutoDoCarrinhoPorNome(nomeProduto, quantidade);
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping("valor-total-carrinho")
     public ResponseEntity<String> valorTotalCarrinho() {
         return  ResponseEntity.status(HttpStatus.ACCEPTED).body(compraService.precoTotalCarrinho());
+    }
+
+    @GetMapping("visualizar-carrinho")
+    public ResponseEntity<Carrinho> visualizarCarrinho() {
+        return  ResponseEntity.status(HttpStatus.ACCEPTED).body(compraService.visualizarCarrinho());
     }
 }

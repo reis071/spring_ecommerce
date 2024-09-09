@@ -161,7 +161,7 @@ public class CompraService {
     }
 
     // Remover produto do carrinho pelo nome
-    public void removerProdutoDoCarrinhoPorNome(String nomeProduto) {
+    public void removerProdutoDoCarrinhoPorNome(String nomeProduto, int quantidade) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
 
@@ -174,15 +174,25 @@ public class CompraService {
         Produto produto = produtoRepository.findByNome(nomeProduto)
                 .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado com o nome: " + nomeProduto));
 
-        Optional<ItemCarrinho> itemCarrinho = itemCarrinhoRepository.findByCarrinhoAndProduto(carrinho, produto);
+        ItemCarrinho itemCarrinho = itemCarrinhoRepository.findByCarrinhoAndProduto(carrinho, produto)
+                .orElseThrow(() -> new IllegalArgumentException("Produto não encontrado no carrinho"));
 
-        if (itemCarrinho.isPresent()) {
-            itemCarrinhoRepository.delete(itemCarrinho.get());
+        int quantidadeAtual = itemCarrinho.getQuantidade();
+
+        if(quantidade ==0){
+            throw new IllegalArgumentException("Quantidade não pode ser igual a 0");
+        }else if(quantidade > quantidadeAtual){
+            throw  new IllegalArgumentException("Quantidade passada é maior que a quantidade do produto que esta no carrinho!");
+        }
+        if (quantidadeAtual == quantidade) {
+            itemCarrinhoRepository.delete(itemCarrinho);
         } else {
-            throw new IllegalArgumentException("Produto não encontrado no carrinho");
+            itemCarrinho.setQuantidade(quantidadeAtual - quantidade);
+            itemCarrinhoRepository.save(itemCarrinho);
         }
     }
 
+    //visualizar preço total do carrinho
     public String precoTotalCarrinho(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -203,6 +213,19 @@ public class CompraService {
                 .sum();
 
         return "{valorTotal: " + valorTotal + "}";
+    }
+
+    public Carrinho visualizarCarrinho(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        Usuario usuario = usuarioRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("Usuário não encontrado com email: " + email));
+
+        Carrinho carrinho = carrinhoRepository.findByUsuario(usuario)
+                .orElseGet(() -> carrinhoRepository.save(new Carrinho(usuario)));
+
+        return carrinho;
     }
 
 }
