@@ -13,6 +13,7 @@
             <ttl unit="minutes">3</ttl>
         </expiry>
 
+
         <!-- Configuração de limites de capacidade -->
         <resources>
             <heap unit="entries">100</heap> <!-- Limite na heap -->
