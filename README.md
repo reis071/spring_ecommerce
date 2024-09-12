@@ -42,7 +42,7 @@ Este projeto é um sistema de ecommerce desenvolvido em Java 17+ com Spring Boot
 - **Spring Boot**
 - **h2/MySQL**
 - **JWT para Autenticação**
-- **Spring Cache**
+- **ehCache**
 - **GitHub para versionamento**
 
 ## Modelo de Banco de Dados
